@@ -106,10 +106,6 @@ class Arm2D(object):
         plt.pause(dt)
 
 
-def func(x):
-    return x*x
-
-
 def main():
     arm2d = Arm2D()
     # ion means Interactive mode ON. this seems to need for animation
