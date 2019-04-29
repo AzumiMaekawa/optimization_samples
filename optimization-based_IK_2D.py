@@ -12,8 +12,8 @@ class Arm2D(object):
         self.endEffectorPos = self.forward_kinematikcs(self.currentJointAngles)
         self.targetPos = self.endEffectorPos
         self.eps = 1e-3
-        self.alpha = 1.
-        self.max_iterN = 1000
+        self.alpha = 0.8
+        self.max_iterN = 100
 
     def forward_kinematikcs(self, jointAngles):
         # position x
@@ -36,7 +36,7 @@ class Arm2D(object):
                 print('not reach')
                 return self.currentJointAngles
             if err < self.eps:
-                print('reach')
+                print('reach at {} steps'.format(itr))
                 return self.currentJointAngles
 
             gradient = self.caluc_gradient(
@@ -115,7 +115,7 @@ def main():
     # ion means Interactive mode ON. this seems to need for animation
     plt.ion()  # ion means Interactive mode ON. this seems to need for animation
     # arm2d.forward_kinematikcs([np.pi, -np.pi/4.])
-    arm2d.inverse_kinematics_GD([-0.9, -0.3], plot=True)
+    arm2d.inverse_kinematics_GD([-1., -0.2], plot=True)
     plt.ioff()
     arm2d.plot_arm()
 
