@@ -1,5 +1,6 @@
 import numpy as np
 from matplotlib import pyplot as plt
+import copy
 
 
 class Arm2D(object):
@@ -12,8 +13,8 @@ class Arm2D(object):
         self.endEffectorPos = self.forward_kinematikcs(self.currentJointAngles)
         self.targetPos = self.endEffectorPos
         self.eps = 1e-3
-        self.alpha = 0.8
-        self.max_iterN = 100
+        self.alpha = 0.5
+        self.max_iterN = 50
 
     def forward_kinematikcs(self, jointAngles):
         # position x
@@ -31,25 +32,100 @@ class Arm2D(object):
         while (1):
             print("targetPos:", self.targetPos)
             itr += 1
-            err = self.objective_function(self.currentJointAngles)
+            err = self.objective_func(self.currentJointAngles)
             if itr > self.max_iterN:
-                print('not reach')
+                print('not reach in {}'.format(self.max_iterN))
+                plt.ioff()
+                self.plot_arm()
                 return self.currentJointAngles
             if err < self.eps:
                 print('reach at {} steps'.format(itr))
+                plt.ioff()
+                self.plot_arm()
                 return self.currentJointAngles
 
-            gradient = self.caluc_gradient(
-                self.objective_function, self.currentJointAngles)
+            grad = self.calc_gradient(
+                self.objective_func, self.currentJointAngles)
             # print('gradient: ', gradient)
-            self.currentJointAngles = self.currentJointAngles - self.alpha * gradient
+            self.currentJointAngles = self.currentJointAngles - self.alpha * grad
             self.endEffectorPos = self.forward_kinematikcs(
                 self.currentJointAngles)
-            print("cuurentPos: ", self.endEffectorPos)
+            print("currentPos: ", self.endEffectorPos)
             if plot:
+                plt.ion()
                 self.plot_arm()
 
-    def objective_function(self, jointAngles):
+    def inverse_kinematics_NewtonsMethod(self, targetPos, plot=False):
+        self.targetPos = targetPos
+        itr = 0
+        while (1):
+            err = self.objective_func(self.currentJointAngles)
+            itr += 1
+            if itr > self.max_iterN:
+                print('not reach in {} steps'.format(self.max_iterN))
+                plt.ioff()
+                self.plot_arm()
+                return self.currentJointAngles
+            if err < self.eps:
+                print('reach at {} steps'.format(itr))
+                plt.ioff()
+                self.plot_arm()
+                return self.currentJointAngles
+
+            grad = self.calc_gradient(
+                self.objective_func, self.currentJointAngles)
+            hessian = self.calc_hessian(
+                self.objective_func, self.currentJointAngles)
+            # the Hessian regularization (this seems to be important for convergence)
+            hessian += 0.5 * np.eye(hessian.shape[0])
+            delta_x = np.linalg.solve(hessian, grad)
+            self.currentJointAngles = self.currentJointAngles - self.alpha * delta_x
+            self.endEffectorPos = self.forward_kinematikcs(
+                self.currentJointAngles)
+            print("currentPos: ", self.endEffectorPos)
+            if plot:
+                plt.ion()
+                self.plot_arm()
+
+    def calc_hessian(self, f, x):
+        h = 1e-5
+        hessian = np.eye(x.size)
+
+        for row in range(x.size):
+            for col in range(x.size):
+                store_x = copy.deepcopy(x)
+
+                # ret = self.calc_gradient(self.calc_gradient(f, x), x)
+                # print("ret: ", ret)
+                # f(x1+h, x2+h)
+                x[row] += h
+                x[col] += h
+                f_x_pp_h = f(x)
+                x = copy.deepcopy(store_x)
+
+                # f(x1+h, x2-h)
+                x[row] += h
+                x[col] -= h
+                f_x_pm_h = f(x)
+                x = copy.deepcopy(store_x)
+
+                # f(x1-h, x2+h)
+                x[row] -= h
+                x[col] += h
+                f_x_mp_h = f(x)
+                x = copy.deepcopy(store_x)
+
+                # f(x1-h, x2-h)
+                x[row] -= h
+                x[col] -= h
+                f_x_mm_h = f(x)
+
+                hessian[row][col] = (
+                    f_x_pp_h - f_x_pm_h - f_x_mp_h + f_x_mm_h) / (4 * h)
+
+        return hessian
+
+    def objective_func(self, jointAngles):
         err_vec = self.forward_kinematikcs(jointAngles) - self.targetPos
         ret_val = (1./2.) * np.dot(err_vec, err_vec)
         # print('loss: ', ret_val)
@@ -60,7 +136,7 @@ class Arm2D(object):
         h = 1e-4 * np.ones(self.motorN)
         return (f(x + h) - f(x - h)) / (2. * h)
 
-    def caluc_gradient(self, f, x):
+    def calc_gradient(self, f, x):
         h = 1e-4
         gradient = np.zeros_like(x)
 
@@ -109,11 +185,11 @@ class Arm2D(object):
 def main():
     arm2d = Arm2D()
     # ion means Interactive mode ON. this seems to need for animation
-    plt.ion()  # ion means Interactive mode ON. this seems to need for animation
+    # plt.ion()  # ion means Interactive mode ON. this seems to need for animation
     # arm2d.forward_kinematikcs([np.pi, -np.pi/4.])
-    arm2d.inverse_kinematics_GD([-1., -0.2], plot=True)
-    plt.ioff()
-    arm2d.plot_arm()
+    # arm2d.inverse_kinematics_GD([-1., -0.5], plot=True)
+    arm2d.inverse_kinematics_NewtonsMethod([-1., 0.5], plot=True)
+    # plt.ioff()
 
 
 if __name__ == "__main__":
