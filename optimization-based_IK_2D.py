@@ -34,10 +34,10 @@ class Arm2D(object):
             err = self.objective_function(self.currentJointAngles)
             if itr > self.max_iterN:
                 print('not reach')
-                break
+                return self.currentJointAngles
             if err < self.eps:
                 print('reach')
-                break
+                return self.currentJointAngles
 
             gradient = self.caluc_gradient(
                 self.objective_function, self.currentJointAngles)
@@ -58,7 +58,6 @@ class Arm2D(object):
     # bad example
     def grad_function(self, f, x):
         h = 1e-4 * np.ones(self.motorN)
-        # 偏微分だから1変数以外固定して微分しないとダメ
         return (f(x + h) - f(x - h)) / (2. * h)
 
     def caluc_gradient(self, f, x):
@@ -105,17 +104,21 @@ class Arm2D(object):
 
         plt.show()
         plt.pause(dt)
-        return
 
 
 def func(x):
     return x*x
 
 
-if __name__ == "__main__":
+def main():
     arm2d = Arm2D()
     # ion means Interactive mode ON. this seems to need for animation
     plt.ion()  # ion means Interactive mode ON. this seems to need for animation
-    fig = plt.figure()
     # arm2d.forward_kinematikcs([np.pi, -np.pi/4.])
     arm2d.inverse_kinematics_GD([-0.9, -0.3], plot=True)
+    plt.ioff()
+    arm2d.plot_arm()
+
+
+if __name__ == "__main__":
+    main()
