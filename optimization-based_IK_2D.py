@@ -26,7 +26,7 @@ class Arm2D(object):
         # print('x, y: ', x, y)
         return np.array([x, y])  # return end effector's [x,y] position
 
-    def inverse_kinematics_GD(self, targetPos, plot=False):
+    def inverse_kinematics_GadientDescent(self, targetPos, plot=False):
         self.targetPos = targetPos
         itr = 0
         while (1):
@@ -187,7 +187,7 @@ def main():
     # ion means Interactive mode ON. this seems to need for animation
     # plt.ion()  # ion means Interactive mode ON. this seems to need for animation
     # arm2d.forward_kinematikcs([np.pi, -np.pi/4.])
-    # arm2d.inverse_kinematics_GD([-1., -0.5], plot=True)
+    # arm2d.inverse_kinematics_GadientDecsent([-1., -0.5], plot=True)
     arm2d.inverse_kinematics_NewtonsMethod([-1., 0.5], plot=True)
     # plt.ioff()
 
