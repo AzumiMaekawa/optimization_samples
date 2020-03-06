@@ -1,8 +1,13 @@
-# optimization_samples
-to test optimization method
+# Optimization Samples
+test for optimization methods
 
 ### optimization-based inverse kinematics example
-* 2Dof simple arm
-* gradient descent
-* newton's method
+#### method
+* Gradient descent
+* Newton's method
 
+#### condition
+* 2 DoF full-actuated robot arm
+* reaching task
+
+![Result example](https://github.com/AzumiMaekawa/optimization_samples/blob/master/images/capture-optimizationbased-ik.png)
