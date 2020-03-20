@@ -10,4 +10,4 @@ test for optimization methods
 * 2 DoF full-actuated robot arm
 * reaching task
 
-![Result example](https://github.com/AzumiMaekawa/optimization_samples/blob/master/images/newtonsIK.png)
+![Result example](https://github.com/AzumiMaekawa/optimization_samples/blob/master/images/newtonsIK.gif)
