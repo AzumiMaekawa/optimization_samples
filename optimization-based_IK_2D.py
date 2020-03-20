@@ -1,5 +1,5 @@
 import numpy as np
-from matplotlib import pyplot as plt
+import matplotlib.pyplot as plt
 import copy
 
 
@@ -15,6 +15,7 @@ class Arm2D(object):
         self.eps = 1e-3
         self.alpha = 0.5
         self.max_iterN = 50
+        self.cnt = 0
 
     def forward_kinematikcs(self, jointAngles):
         # position x
@@ -157,6 +158,7 @@ class Arm2D(object):
         return gradient
 
     def plot_arm(self):
+        self.cnt += 1
         dt = 1e-8
         shoulder = np.array([0, 0])
         elbow = shoulder + np.array(
@@ -179,6 +181,7 @@ class Arm2D(object):
         plt.ylim(-2, 2)
 
         plt.show()
+        # plt.savefig('opt-based-ik-fig/img{}.png'.format(self.cnt))
         plt.pause(dt)
 
 
